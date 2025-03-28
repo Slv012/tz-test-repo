@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ include "common.namespace" . }}
+  name: {{ .Values.deploymentName.symfony | default "symfony-app" }}
+  labels:
+    {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.symfony "environment" .Values.environment) | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount.symfony | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.symfony "environment" .Values.environment) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.symfony "environment" .Values.environment) | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Values.container.symfony.name | default "symfony" }}
+          image: "{{ .Values.container.symfony.image }}:{{ .Values.container.symfony.tag }}"
+          ports:
+            - containerPort: {{ .Values.container.symfony.port | default 9000 }}
+          resources:
+            requests:
+              memory: {{ .Values.resources.symfony.memory | default "512Mi" | quote }}
+              cpu: {{ .Values.resources.symfony.cpu | default "500m" | quote }}
+            limits:
+              memory: {{ .Values.resources.symfony.memory | default "512Mi" | quote }}
+              cpu: {{ .Values.resources.symfony.cpu | default "500m" | quote }}

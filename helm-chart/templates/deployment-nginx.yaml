@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ include "common.namespace" . }}
+  name: {{ .Values.deploymentName.nginx | default "nginx" }}
+  labels:
+    {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount.nginx | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Values.container.nginx.name | default "nginx" }}
+          image: "{{ .Values.container.nginx.image }}:{{ .Values.container.nginx.tag }}"
+          ports:
+            - containerPort: {{ .Values.container.nginx.port | default 80 }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+          resources:
+            requests:
+              memory: {{ .Values.resources.nginx.memory | default "256Mi" | quote }}
+              cpu: {{ .Values.resources.nginx.cpu | default "250m" | quote }}
+            limits:
+              memory: {{ .Values.resources.nginx.memory | default "256Mi" | quote }}
+              cpu: {{ .Values.resources.nginx.cpu | default "250m" | quote }}
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config

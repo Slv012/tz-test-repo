@@ -1,0 +1,27 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ include "common.namespace" . }}
+  name: nginx-ingress
+  labels:
+    {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: {{ .Values.ingress.host | default "my-sym-app.com" }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.serviceName.nginx | default "nginx" }}
+                port:
+                  number: {{ .Values.service.nginx.port | default 80 }}
+  # tls:
+  #   - hosts:
+  #       - {{ .Values.ingress.host | default "example.com" }}
+  #     secretName: {{ .Values.ingress.tlsSecretName | default "nginx-tls" }}
+{{- end }}

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ include "common.namespace" . }}
+  name: nginx-config
+data:
+  default.conf: |
+    {{- required "File files/nginx/default.conf is missing" (.Files.Get "files/nginx/default.conf") | nindent 4 }}
