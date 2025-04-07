@@ -2,28 +2,30 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: {{ include "common.namespace" . }}
-  name: {{ .Values.deploymentName.symfony | default "symfony-app" }}
+  name: {{ .Values.symfony.name }}
   labels:
-    {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.symfony "environment" .Values.environment) | nindent 4 }}
+    {{- include "common.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount.symfony | default 1 }}
+  replicas: {{ .Values.symfony.replica }}
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
-      {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.symfony "environment" .Values.environment) | nindent 6 }}
+      app: {{ .Values.symfony.name }}
   template:
     metadata:
       labels:
-        {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.symfony "environment" .Values.environment) | nindent 8 }}
+        app: {{ .Values.symfony.name }}
     spec:
       containers:
-        - name: {{ .Values.container.symfony.name | default "symfony" }}
-          image: "{{ .Values.container.symfony.image }}:{{ .Values.container.symfony.tag }}"
+        - name: {{ .Values.symfony.container.name }}
+          image: "{{ .Values.symfony.container.image }}:{{ .Values.symfony.container.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.container.symfony.port | default 9000 }}
+            - containerPort: {{ .Values.symfony.targetPort }}
           resources:
             requests:
-              memory: {{ .Values.resources.symfony.memory | default "512Mi" | quote }}
-              cpu: {{ .Values.resources.symfony.cpu | default "500m" | quote }}
+              memory: {{ .Values.symfony.resources.memory }}
+              cpu: {{ .Values.symfony.resources.cpu }}
             limits:
-              memory: {{ .Values.resources.symfony.memory | default "512Mi" | quote }}
-              cpu: {{ .Values.resources.symfony.cpu | default "500m" | quote }}
+              memory: {{ .Values.symfony.resources.memory }}
+              cpu: {{ .Values.symfony.resources.cpu }}

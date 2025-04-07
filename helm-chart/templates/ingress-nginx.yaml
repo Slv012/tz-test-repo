@@ -5,7 +5,7 @@ metadata:
   namespace: {{ include "common.namespace" . }}
   name: nginx-ingress
   labels:
-    {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 4 }}
+    {{- include "common.labels" . | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -17,9 +17,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Values.serviceName.nginx | default "nginx" }}
+                name: {{ .Values.nginx.name }}
                 port:
-                  number: {{ .Values.service.nginx.port | default 80 }}
+                  number: {{ .Values.nginx.port }}
   # tls:
   #   - hosts:
   #       - {{ .Values.ingress.host | default "example.com" }}

@@ -3,6 +3,7 @@
 {{- end }}
 
 {{- define "common.labels" -}}
-app: {{ .deploymentName | default "app" }}
-environment: {{ .environment | default "dev" }}
+app: {{ .Chart.Name }}
+release: {{ .Release.Name }}
+environment: {{ .Values.environment | default "dev" }}
 {{- end }}

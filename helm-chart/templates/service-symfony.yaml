@@ -2,16 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ include "common.namespace" . }}
-  name: {{ .Values.serviceName.symfony | default "symfony-app" }}
+  name: {{ .Values.symfony.name }}
   labels:
-    {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.symfony "environment" .Values.environment) | nindent 4 }}
+    {{- include "common.labels" . | nindent 4 }}
 spec:
   selector:
-    app: {{ .Values.deploymentName.symfony | default "symfony-app" }}
+    app: {{ .Values.symfony.name }}
     environment: {{ .Values.environment | default "dev" }}
   ports:
     - protocol: TCP
-      port: {{ .Values.service.symfony.port | default 9000 }}
-      targetPort: {{ .Values.service.symfony.targetPort | default 9000 }}
+      port: {{ .Values.symfony.port }}
+      targetPort: {{ .Values.symfony.targetPort }}
   type: ClusterIP
-  # clusterIP: None

@@ -2,35 +2,59 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: {{ include "common.namespace" . }}
-  name: {{ .Values.deploymentName.nginx | default "nginx" }}
+  name: {{ .Values.nginx.name }}
   labels:
-    {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 4 }}
+    {{- include "common.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount.nginx | default 1 }}
+  replicas: {{ .Values.nginx.replica }}
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
-      {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 6 }}
+      app: {{ .Values.nginx.name }}
   template:
     metadata:
       labels:
-        {{- include "common.labels" (dict "deploymentName" .Values.deploymentName.nginx "environment" .Values.environment) | nindent 8 }}
+        app: {{ .Values.nginx.name }}
     spec:
       containers:
-        - name: {{ .Values.container.nginx.name | default "nginx" }}
-          image: "{{ .Values.container.nginx.image }}:{{ .Values.container.nginx.tag }}"
+        - name: {{ .Values.nginx.container.name }}
+          image: "{{ .Values.nginx.container.image }}:{{ .Values.nginx.container.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.container.nginx.port | default 80 }}
+            - containerPort: {{ .Values.nginx.targetPort }}
           volumeMounts:
             - name: nginx-config
               mountPath: /etc/nginx/conf.d
           resources:
             requests:
-              memory: {{ .Values.resources.nginx.memory | default "256Mi" | quote }}
-              cpu: {{ .Values.resources.nginx.cpu | default "250m" | quote }}
+              memory: {{ .Values.nginx.resources.memory }}
+              cpu: {{ .Values.nginx.resources.cpu }}
             limits:
-              memory: {{ .Values.resources.nginx.memory | default "256Mi" | quote }}
-              cpu: {{ .Values.resources.nginx.cpu | default "250m" | quote }}
+              memory: {{ .Values.nginx.resources.memory }}
+              cpu: {{ .Values.nginx.resources.cpu }}
+      livenessProbe:
+        httpGet:
+          path: /
+          port: {{ .Values.nginx.port }}
+        initialDelaySeconds: 3
+        periodSeconds: 10
+      readinessProbe:
+        httpGet:
+          path: /
+          port: {{ .Values.nginx.port }}
+        initialDelaySeconds: 1
+        periodSeconds: 5
       volumes:
         - name: nginx-config
           configMap:
             name: nginx-config
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - {{ .Values.symfony.name }}
+            topologyKey: "kubernetes.io/hostname"

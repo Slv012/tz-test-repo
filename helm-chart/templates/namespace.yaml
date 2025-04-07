@@ -3,5 +3,4 @@ kind: Namespace
 metadata:
   name: {{ include "common.namespace" . }}
   labels:
-    app: {{ .Chart.Name }}
-    environment: {{ .Values.environment | default "prod" }}
+    {{- include "common.labels" . | nindent 4 }}

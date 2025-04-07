@@ -1,51 +1,34 @@
-replicaCount:
-  symfony: 1
-  nginx: 1
-
-deploymentName:
-  symfony: symfony-app
-  nginx: nginx
-
-# image:
-#   repository: myrepo/symfony-app
-#   tag: "1.0.0"
 image:
   repository: my-symfony-img
   tag: "1.0.0"
   pullPolicy: IfNotPresent
 
-container:
-  symfony:
+symfony:
+  replica: 1
+  name: symfony-app
+  port: 9000
+  targetPort: 9000
+  resources: 
+    memory: "512Mi"
+    cpu: "500m"
+  container:
     name: symfony
     image: my-symfony-img
     tag: "0.1.0"
-    port: 9000
-  nginx:
+
+nginx:
+  replica: 1
+  name: nginx
+  port: 80
+  targetPort: 80
+  resources: 
+    memory: "256Mi"
+    cpu: "250m"
+  container:
     name: nginx
     image: nginx
     tag: "1.27"
-    port: 80
-
-resources:
-  symfony:
-    memory: "512Mi"
-    cpu: "500m"
-  nginx:
-    memory: "256Mi"
-    cpu: "250m"
-
-service:
-  symfony:
-    port: 9000
-    targetPort: 9000
-  nginx:
-    port: 80
-    targetPort: 80
-
-serviceName:
-  symfony: symfony-app
-  nginx: nginx
-
+  
 ingress:
   enabled: false
   host: my-sym-app.com
