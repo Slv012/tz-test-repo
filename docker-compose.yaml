@@ -24,7 +24,7 @@ services:
 
   db:
     deploy:
-      replicas: 0
+      replicas: 1
     image: postgres:15
     container_name: postgres_db
     environment: 
